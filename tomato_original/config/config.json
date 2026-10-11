@@ -1,0 +1,33 @@
+{
+    "camera_confidence": 0.6,
+    "audio_confidence": 0.75,
+    "audio_min_rms": 0.02,
+    "detection_delay_sec": 5.0,
+    "scare_duration_sec": 10.0,
+    "required_consecutive_detections": 3,
+    "deterrent_cooldown": 10,
+    "speaker_volume": 1.0,
+    "camera_resolution": [416, 416],
+    "db_path": "scarex.db",
+    "flask_port": 5000,
+    "gpio_pins": {
+        "motor_in1": 17,
+        "motor_in2": 27,
+        "motor_in3": 22,
+        "motor_in4": 23,
+        "ultrasonic_trigger": 24,
+        "ultrasonic_echo": 25,
+        "servo_camera": 18
+    },
+    "alarm_logic": {
+        "Crow": ["Hawk call", "siren"],
+        "Rose-ringed Parakeet": ["Eagle call"],
+        "Common Myna": ["Falcon call"],
+        "Sparrow": ["Hawk call"],
+        "Dove": ["Falcon call"],
+        "Pigeon": ["Siren"],
+        "Peacock": ["Alarm"],
+        "Hen": ["gentle beep"],
+        "Unknown": ["Loud siren"]
+    }
+}

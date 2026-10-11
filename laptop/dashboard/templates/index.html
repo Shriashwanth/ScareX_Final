@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScareX Integrated Autonomous System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0c0f17;
+            --panel-bg: #161b26;
+            --card-border: rgba(255, 255, 255, 0.08);
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --danger-red: #ef4444;
+            --success-green: #10b981;
+            --warning-amber: #f59e0b;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: rgba(22, 27, 38, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-badges {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .status-chip {
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+        }
+
+        .status-chip.online {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success-green);
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        .status-chip.dev-mode {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .status-chip.offline {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger-red);
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 1.7fr 1.1fr;
+            gap: 1.5rem;
+            padding: 1.5rem 2rem;
+            flex: 1;
+        }
+
+        .left-col, .right-col {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--panel-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Stream Section */
+        .stream-wrapper {
+            position: relative;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+        }
+
+        .stream-wrapper img {
+            width: 100%;
+            height: auto;
+            max-height: 520px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .stream-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        button {
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--accent-blue);
+            color: #fff;
+        }
+        .btn-primary:hover { background: #2563eb; }
+
+        .btn-mode {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-secondary);
+            border-color: var(--card-border);
+        }
+        .btn-mode.active {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+
+        .btn-danger {
+            background: var(--danger-red);
+            color: #fff;
+        }
+        .btn-danger:hover { background: #dc2626; }
+
+        .btn-warning {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning-amber);
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-success {
+            background: var(--success-green);
+            color: #000;
+            font-weight: 700;
+        }
+
+        /* Metric Grids */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .metric-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* Progress & Priority */
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            overflow: hidden;
+            display: flex;
+            margin-top: 10px;
+        }
+
+        .progress-bar-seg { height: 100%; }
+
+        .prio-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .prio-high { background: rgba(239, 68, 68, 0.2); color: var(--danger-red); border: 1px solid var(--danger-red); }
+        .prio-medium { background: rgba(245, 158, 11, 0.2); color: var(--warning-amber); border: 1px solid var(--warning-amber); }
+        .prio-low { background: rgba(16, 185, 129, 0.2); color: var(--success-green); border: 1px solid var(--success-green); }
+
+        /* Row Table */
+        .row-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+
+        .row-table th {
+            text-align: left;
+            padding: 6px 8px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .row-table td {
+            padding: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* Log Table */
+        .log-list {
+            max-height: 180px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 0.82rem;
+        }
+
+        .log-item {
+            padding: 6px 10px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 3px solid var(--accent-blue);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Hardware controls */
+        .dpad-container {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            grid-gap: 6px;
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        .dpad-btn {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+        .dpad-btn:hover { background: rgba(59, 130, 246, 0.3); }
+
+        @media (max-width: 1100px) {
+            main { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand-logo">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-cyan);">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <h1>ScareX Integrated System</h1>
+        </div>
+
+        <div class="header-badges">
+            <div id="badge-cam" class="status-chip dev-mode">
+                <span class="pulse-dot"></span>
+                <span id="text-cam">Camera Source: LAPTOP WEBCAM</span>
+            </div>
+            <div id="badge-pi" class="status-chip offline">
+                <span class="pulse-dot"></span>
+                <span id="text-pi">Raspberry Pi: DISCONNECTED</span>
+            </div>
+            <button class="btn-danger" onclick="triggerEmergencyStop()">EMERGENCY STOP</button>
+        </div>
+    </header>
+
+    <main>
+        <!-- LEFT COLUMN: Live Camera Feed & Row Analytics -->
+        <div class="left-col">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Live Surveillance & Dual-AI Vision Stream</h2>
+                    <div class="btn-group">
+                        <button class="btn-mode active" id="btn-mode-both" onclick="setOverlay('both')">Both Models</button>
+                        <button class="btn-mode" id="btn-mode-bird" onclick="setOverlay('bird_only')">Bird Only</button>
+                        <button class="btn-mode" id="btn-mode-tomato" onclick="setOverlay('tomato_only')">Tomato Only</button>
+                        <button class="btn-mode" id="btn-mode-raw" onclick="setOverlay('raw')">Raw Video</button>
+                    </div>
+                </div>
+
+                <div class="stream-wrapper">
+                    <img id="pi-stream-img" src="/video_feed" alt="Connecting to Camera Stream..." onerror="this.src='';">
+                </div>
+
+                <div class="stream-controls">
+                    <div class="btn-group">
+                        <button class="btn-primary" onclick="toggleSystem(true)">Start Monitoring</button>
+                        <button class="btn-warning" onclick="toggleSystem(false)">Pause Monitoring</button>
+                        <button class="btn-mode" onclick="sweepServo()">Sweep Camera</button>
+                        <button class="btn-danger" style="background: rgba(239,68,68,0.25); border: 1px solid var(--danger-red); color: #fca5a5;" onclick="triggerManualBuzzer()">Test Buzzer Sound</button>
+                    </div>
+                    <button class="btn-success" onclick="window.location.href='/api/report/pdf'">Export PDF Report</button>
+                </div>
+            </div>
+
+            <!-- Tomato Row-wise Spatial Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Tomato Crop Row-wise Analytics</h2>
+                    <span id="label-harvest-priority" class="prio-badge prio-low">STANDBY</span>
+                </div>
+                <table class="row-table">
+                    <thead>
+                        <tr>
+                            <th>Row #</th>
+                            <th>Total Observed</th>
+                            <th>Green (%)</th>
+                            <th>Half-Ripened (%)</th>
+                            <th>Fully-Ripened (%)</th>
+                            <th>Harvest Priority</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-rows-body">
+                        <tr><td colspan="6" style="color: var(--text-secondary); text-align: center;">Waiting for field crop detections...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Event & Security Log -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Recent Detections & Robot Security Audit</h2>
+                    <span id="frames-counter" style="font-size: 0.8rem; color: var(--text-secondary);">Frames: 0</span>
+                </div>
+                <div class="log-list" id="log-list-container">
+                    <div style="color: var(--text-secondary);">Initializing event log stream...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Bird Intelligence & Tomato Maturity Metrics -->
+        <div class="right-col">
+            <!-- Bird Deterrence Module Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Bird Detection & Deterrence Engine</h2>
+                    <span id="scare-badge" class="status-chip" style="background: rgba(255,255,255,0.05);">IDLE</span>
+                </div>
+                <div class="metrics-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="metric-box">
+                        <div class="metric-label">Detected Species</div>
+                        <div class="metric-value" id="val-bird-species" style="color: #60a5fa; font-size: 1.25rem;">None</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Confidence</div>
+                        <div class="metric-value" id="val-bird-conf">0.0%</div>
+                    </div>
+                </div>
+                <div style="margin-top: 10px; display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-secondary);">
+                    <span>Detection Mode: <strong id="val-bird-source" style="color:#38bdf8;">Camera + Mic</strong></span>
+                    <span>Microphone: <strong id="val-bird-audio-status" style="color:#34d399;">Listening</strong></span>
+                </div>
+                <div style="margin-top: 6px; display: flex; justify-content: space-between; font-size: 0.80rem; color: var(--text-secondary);">
+                    <span>Acoustic Birds_Audio: <strong id="val-bird-audio-species" style="color:#fcd34d;">Silent</strong></span>
+                    <span>Mic Energy: <strong id="val-bird-audio-rms" style="color:#fff;">0.000</strong></span>
+                </div>
+            </div>
+
+            <!-- Tomato Maturity Distribution Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Tomato Crop Ripeness Distribution</h2>
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);">Total: <strong id="val-tomato-total" style="color:#fff;">0</strong></span>
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-box">
+                        <div class="metric-label">Green</div>
+                        <div class="metric-value" id="val-green-count" style="color: #22c55e;">0</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);" id="val-green-pct">0%</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Half-Ripened</div>
+                        <div class="metric-value" id="val-half-count" style="color: #f59e0b;">0</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);" id="val-half-pct">0%</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Fully-Ripened</div>
+                        <div class="metric-value" id="val-full-count" style="color: #ef4444;">0</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);" id="val-full-pct">0%</div>
+                    </div>
+                </div>
+
+                <div class="progress-bar-container">
+                    <div id="bar-green" class="progress-bar-seg" style="width: 0%; background: #22c55e;"></div>
+                    <div id="bar-half" class="progress-bar-seg" style="width: 0%; background: #f59e0b;"></div>
+                    <div id="bar-full" class="progress-bar-seg" style="width: 0%; background: #ef4444;"></div>
+                </div>
+            </div>
+
+            <!-- Robot Actuator Telemetry & Manual Navigation -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Robot Hardware Telemetry & Navigation</h2>
+                    <span id="val-hw-mode" style="font-size: 0.8rem; color: var(--text-secondary);">Hardware: Online</span>
+                </div>
+                <div class="metrics-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 12px;">
+                    <div class="metric-box">
+                        <div class="metric-label">Obstacle Distance</div>
+                        <div class="metric-value" id="val-hw-dist">1.25m</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Speaker Audio</div>
+                        <div class="metric-value" id="val-hw-audio" style="font-size: 1.1rem; color: #34d399;">Idle</div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 6px;">
+                    <div class="metric-label">Autonomous / Manual Drive</div>
+                    <div class="dpad-container">
+                        <div></div>
+                        <button class="dpad-btn" onclick="moveRobot('forward')">▲</button>
+                        <div></div>
+                        <button class="dpad-btn" onclick="moveRobot('turn_left')">◀</button>
+                        <button class="dpad-btn" style="background: rgba(239, 68, 68, 0.2);" onclick="moveRobot('stop')">■</button>
+                        <button class="dpad-btn" onclick="moveRobot('turn_right')">▶</button>
+                        <div></div>
+                        <button class="dpad-btn" onclick="moveRobot('backward')">▼</button>
+                        <div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentMode = "both";
+
+        function setOverlay(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.btn-mode').forEach(b => b.classList.remove('active'));
+            const activeBtn = document.getElementById('btn-mode-' + mode.replace('_only', ''));
+            if (activeBtn) activeBtn.classList.add('active');
+
+            fetch('/api/control/overlay', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({mode: mode})
+            });
+        }
+
+        function toggleSystem(active) {
+            fetch('/api/control/' + (active ? 'start' : 'stop'), {method: 'POST'});
+        }
+
+        function triggerEmergencyStop() {
+            if (confirm("Execute immediate EMERGENCY STOP across all robot motors and actuators?")) {
+                fetch('/api/control/emergency_stop', {method: 'POST'});
+            }
+        }
+
+        function sweepServo() {
+            fetch('/api/control/servo', {method: 'POST'});
+        }
+
+        function moveRobot(direction) {
+            fetch('/api/control/move', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({direction: direction})
+            });
+        }
+
+        // Web Audio API Buzzer Sound
+        let webAudioCtx = null;
+        let webAudioInterval = null;
+
+        function startBrowserBuzzer() {
+            try {
+                if (webAudioInterval) return;
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                if (!webAudioCtx) webAudioCtx = new AudioContext();
+                if (webAudioCtx.state === 'suspended') webAudioCtx.resume();
+
+                function playPulse() {
+                    if (!webAudioCtx) return;
+                    const osc = webAudioCtx.createOscillator();
+                    const gain = webAudioCtx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(1100, webAudioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.25, webAudioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, webAudioCtx.currentTime + 0.22);
+                    osc.connect(gain);
+                    gain.connect(webAudioCtx.destination);
+                    osc.start();
+                    osc.stop(webAudioCtx.currentTime + 0.25);
+                }
+                playPulse();
+                webAudioInterval = setInterval(playPulse, 350);
+            } catch (e) {
+                console.log("[Buzzer] Web Audio note:", e);
+            }
+        }
+
+        function stopBrowserBuzzer() {
+            if (webAudioInterval) {
+                clearInterval(webAudioInterval);
+                webAudioInterval = null;
+            }
+        }
+
+        function triggerManualBuzzer() {
+            fetch('/api/control/buzzer', {method: 'POST'});
+        }
+
+        function updateTelemetry() {
+            fetch('/api/status')
+                .then(r => r.json())
+                .then(data => {
+                    // Synchronize browser audio with bird deterrence state
+                    if (data.bird && data.bird.scare_active) {
+                        startBrowserBuzzer();
+                    } else {
+                        stopBrowserBuzzer();
+                    }
+                    // 1. Camera Source Badge
+                    const camBadge = document.getElementById('badge-cam');
+                    const camText = document.getElementById('text-cam');
+                    const isConnected = data.camera && data.camera.connected;
+                    const camSource = (data.camera && data.camera.source) ? data.camera.source : "CAMERA";
+                    const camMode = (data.camera && data.camera.mode) ? data.camera.mode : "UNKNOWN";
+
+                    if (isConnected) {
+                        if (camMode === "LAPTOP") {
+                            camBadge.className = "status-chip dev-mode";
+                            camText.innerText = "Camera Source: LAPTOP WEBCAM";
+                        } else {
+                            camBadge.className = "status-chip online";
+                            camText.innerText = "Camera Source: PI CAMERA (STREAM)";
+                        }
+                    } else {
+                        camBadge.className = "status-chip offline";
+                        camText.innerText = (camMode === "LAPTOP") ? "Laptop Webcam: DISCONNECTED" : "Pi Camera: OFFLINE";
+                    }
+
+                    // 2. Pi Connection Badge
+                    const piBadge = document.getElementById('badge-pi');
+                    const piText = document.getElementById('text-pi');
+                    if (data.pi_node.connected) {
+                        piBadge.className = "status-chip online";
+                        piText.innerText = "Raspberry Pi: CONNECTED";
+                    } else {
+                        piBadge.className = "status-chip offline";
+                        piText.innerText = (camMode === "LAPTOP") ? "Pi Hardware: LOCAL DEV" : "Raspberry Pi: DISCONNECTED";
+                    }
+
+                    // 3. Bird Telemetry
+                    document.getElementById('val-bird-species').innerText = data.bird.species;
+                    document.getElementById('val-bird-conf').innerText = data.bird.confidence + '%';
+                    const srcElem = document.getElementById('val-bird-source');
+                    if (srcElem && data.bird.source) srcElem.innerText = data.bird.source;
+
+                    const ac = data.bird.acoustic_listener;
+                    if (ac) {
+                        const micElem = document.getElementById('val-bird-audio-status');
+                        const specElem = document.getElementById('val-bird-audio-species');
+                        const rmsElem = document.getElementById('val-bird-audio-rms');
+                        if (micElem) {
+                            micElem.innerText = ac.bird_detected ? "HEARD BIRD!" : "Listening";
+                            micElem.style.color = ac.bird_detected ? "#ef4444" : "#34d399";
+                        }
+                        if (specElem) {
+                            specElem.innerText = ac.bird_detected ? (ac.species + " (" + ac.confidence + "%)") : "Silent";
+                            specElem.style.color = ac.bird_detected ? "#f59e0b" : "#9ca3af";
+                        }
+                        if (rmsElem) rmsElem.innerText = ac.rms_energy ? ac.rms_energy.toFixed(3) : "0.000";
+                    }
+
+                    const scareBadge = document.getElementById('scare-badge');
+                    if (data.bird.scare_active) {
+                        scareBadge.className = "status-chip offline";
+                        scareBadge.innerText = "DETERRENCE SOUND ACTIVE";
+                    } else {
+                        scareBadge.className = "status-chip online";
+                        scareBadge.innerText = "SURVEILLANCE OK (SILENT)";
+                    }
+
+                    // 4. Tomato Telemetry
+                    const t = data.tomato;
+                    document.getElementById('val-tomato-total').innerText = t.total_observed;
+                    document.getElementById('val-green-count').innerText = t.session_max_counts.green;
+                    document.getElementById('val-green-pct').innerText = t.green_pct + '%';
+                    document.getElementById('val-half-count').innerText = t.session_max_counts.half_ripened;
+                    document.getElementById('val-half-pct').innerText = t.half_pct + '%';
+                    document.getElementById('val-full-count').innerText = t.session_max_counts.fully_ripened;
+                    document.getElementById('val-full-pct').innerText = t.full_pct + '%';
+
+                    document.getElementById('bar-green').style.width = t.green_pct + '%';
+                    document.getElementById('bar-half').style.width = t.half_pct + '%';
+                    document.getElementById('bar-full').style.width = t.full_pct + '%';
+
+                    const prioLabel = document.getElementById('label-harvest-priority');
+                    prioLabel.innerText = "HARVEST: " + t.harvest_priority;
+                    if (t.harvest_priority === "HIGH") prioLabel.className = "prio-badge prio-high";
+                    else if (t.harvest_priority === "MEDIUM") prioLabel.className = "prio-badge prio-medium";
+                    else prioLabel.className = "prio-badge prio-low";
+
+                    // 5. Tomato Rows Table
+                    const rowsBody = document.getElementById('table-rows-body');
+                    if (t.row_analysis && t.row_analysis.length > 0) {
+                        rowsBody.innerHTML = '';
+                        t.row_analysis.forEach(r => {
+                            const pClass = r.priority === 'HIGH' ? 'prio-high' : (r.priority === 'MEDIUM' ? 'prio-medium' : 'prio-low');
+                            rowsBody.innerHTML += `
+                                <tr>
+                                    <td><strong>Row ${r.row_number}</strong></td>
+                                    <td>${r.total}</td>
+                                    <td>${r.green_pct}%</td>
+                                    <td>${r.half_pct}%</td>
+                                    <td>${r.full_pct}%</td>
+                                    <td><span class="prio-badge ${pClass}">${r.priority}</span></td>
+                                </tr>
+                            `;
+                        });
+                    }
+
+                    // 6. Hardware Diagnostics
+                    if (data.pi_node.telemetry) {
+                        const tel = data.pi_node.telemetry;
+                        if (tel.distance_meters !== undefined) {
+                            document.getElementById('val-hw-dist').innerText = tel.distance_meters + 'm';
+                        }
+                        if (tel.audio && tel.audio.playing) {
+                            document.getElementById('val-hw-audio').innerText = "Playing: " + tel.audio.current_sound;
+                        } else {
+                            document.getElementById('val-hw-audio').innerText = "Idle";
+                        }
+                        if (tel.is_mock_hardware) {
+                            document.getElementById('val-hw-mode').innerText = "Hardware: Mock (Dev)";
+                        } else {
+                            document.getElementById('val-hw-mode').innerText = "Hardware: Pi GPIO";
+                        }
+                    }
+
+                    document.getElementById('frames-counter').innerText = "Frames: " + data.metrics.frames_processed;
+                })
+                .catch(err => {});
+        }
+
+        function updateLogs() {
+            fetch('/api/logs')
+                .then(r => r.json())
+                .then(logs => {
+                    const container = document.getElementById('log-list-container');
+                    if (logs && logs.length > 0) {
+                        container.innerHTML = '';
+                        logs.forEach(l => {
+                            const timeStr = l.timestamp ? l.timestamp.split(' ')[1] || l.timestamp : '';
+                            container.innerHTML += `
+                                <div class="log-item">
+                                    <span>[${timeStr}] <strong>${l.event_type}</strong> - ${l.species !== 'None' ? l.species : ''} ${l.robot_action || ''}</span>
+                                    <span style="color: var(--text-secondary);">${l.details || ''}</span>
+                                </div>
+                            `;
+                        });
+                    }
+                })
+                .catch(err => {});
+        }
+
+        // Poll every 1 second
+        setInterval(updateTelemetry, 1000);
+        setInterval(updateLogs, 2500);
+        updateTelemetry();
+        updateLogs();
+    </script>
+</body>
+</html>

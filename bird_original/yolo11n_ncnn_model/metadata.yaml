@@ -1,0 +1,22 @@
+description: Ultralytics YOLO11n model trained on coco_converted\data.yaml
+author: Ultralytics
+date: '2026-09-14T18:52:04.674598+05:30'
+version: 8.4.129
+license: AGPL-3.0 License (https://ultralytics.com/license)
+docs: https://docs.ultralytics.com
+stride: 32
+task: detect
+head: Detect
+batch: 1
+imgsz:
+- 640
+- 640
+names:
+  0: b_fully_ripened
+  1: b_half_ripened
+  2: b_green
+args:
+  batch: 1
+  quantize: null
+channels: 3
+end2end: false

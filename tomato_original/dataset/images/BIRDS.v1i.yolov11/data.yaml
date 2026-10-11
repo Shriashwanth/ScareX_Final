@@ -1,0 +1,7 @@
+
+train: C:\Users\Ashwanth\Downloads\ScareX\dataset\images\BIRDS.v1i.yolov11\train\images
+val: C:\Users\Ashwanth\Downloads\ScareX\dataset\images\BIRDS.v1i.yolov11\valid\images
+test: C:\Users\Ashwanth\Downloads\ScareX\dataset\images\BIRDS.v1i.yolov11\test\images
+
+nc: 5
+names: ['Crow', 'Common Myna', 'Rose Ringed Parakeet', 'Peacock', 'Pigeon']

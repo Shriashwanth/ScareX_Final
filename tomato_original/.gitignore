@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Logs and DB
+logs/*.log
+*.log
+scarex.db
+
+# Environments & IDE
+.venv/
+venv/
+ENV/
+.idea/
+.vscode/
+
+# Temporary test outputs
+test_output.jpg
+demo_output.jpg

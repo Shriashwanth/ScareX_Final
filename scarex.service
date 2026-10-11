@@ -1,0 +1,17 @@
+[Unit]
+Description=ScareX Standalone Raspberry Pi 5 Autonomous Surveillance System
+After=network.target sound.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/ScareX_Integration-main
+ExecStart=/bin/bash /home/pi/ScareX_Integration-main/start_pi.sh
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

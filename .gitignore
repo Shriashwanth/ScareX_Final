@@ -1,0 +1,35 @@
+# Python cache & virtual environment
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+env/
+
+# Pytest & Testing caches
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Temporary storage & IDE
+.system_generated/
+.tempmediaStorage/
+*.swp
+*.swo
+*~
+Thumbs.db
+.DS_Store
+
+# Junction symlinks to avoid duplicate tracking
+bird_source
+tomato_source
+
+# Runtime logs and databases
+*.log
+*.db
+laptop/database/*.db
+raspberry_pi/database/*.db
+raspberry_pi/reports/*.pdf
+reports/*.pdf
+

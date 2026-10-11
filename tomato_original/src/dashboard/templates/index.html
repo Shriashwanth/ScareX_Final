@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScareX v2.0 Dashboard</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --panel-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --accent-color: #3b82f6;
+            --danger-color: #ef4444;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            background-color: var(--panel-bg);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            letter-spacing: 1px;
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            background-color: #333;
+        }
+
+        .status-badge.running { background-color: rgba(16, 185, 129, 0.2); color: var(--success-color); }
+        .status-badge.stopped { background-color: rgba(239, 68, 68, 0.2); color: var(--danger-color); }
+
+        main {
+            display: flex;
+            flex: 1;
+            padding: 1.5rem;
+            gap: 1.5rem;
+            overflow: hidden;
+        }
+
+        .left-panel {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .card {
+            background-color: var(--panel-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            border: 1px solid #2a2a2a;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            color: #fff;
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.5rem;
+        }
+
+        .video-container {
+            width: 100%;
+            aspect-ratio: 4/3;
+            background-color: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #333;
+        }
+
+        .video-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .metric-box {
+            background-color: #252525;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #333;
+            transition: all 0.3s ease;
+        }
+
+        .metric-box:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .metric-title {
+            font-size: 0.85rem;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .log-table th, .log-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+
+        .log-table th {
+            color: #aaa;
+            font-weight: normal;
+        }
+
+        .log-type-scare { color: var(--danger-color); font-weight: bold; }
+        .log-type-info { color: var(--accent-color); }
+
+        .scare-indicator {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 2px solid var(--danger-color);
+            color: var(--danger-color);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            animation: pulse 1.5s infinite;
+            display: none;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>ScareX Dashboard</h1>
+        <div id="sys-status-badge" class="status-badge">Connecting...</div>
+    </header>
+
+    <main>
+        <div class="left-panel">
+            <div class="card" style="flex: 1; display: flex; flex-direction: column;">
+                <h2>Live Camera Feed</h2>
+                <div class="video-container">
+                    <img src="/video_feed" alt="Video Stream">
+                </div>
+            </div>
+            <div class="card">
+                <h2>Real-time Telemetry</h2>
+                <div class="metrics-grid">
+                    <div class="metric-box">
+                        <div class="metric-title">Vision AI</div>
+                        <div class="metric-value" id="vision-bird">--</div>
+                        <div style="font-size: 0.8rem; color: #aaa; margin-top: 5px;" id="vision-conf">0%</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-title">Audio AI</div>
+                        <div class="metric-value" id="audio-bird">--</div>
+                        <div style="font-size: 0.8rem; color: #aaa; margin-top: 5px;" id="audio-conf">0%</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-title">Distance (Obstacle)</div>
+                        <div class="metric-value" id="dist-val">-- m</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-title">Battery</div>
+                        <div class="metric-value" id="batt-val" style="color: var(--success-color);">--</div>
+                    </div>
+                </div>
+                <div id="scare-alert" class="scare-indicator" style="margin-top: 1rem;">
+                    ⚠️ SCARE MODE ACTIVE ⚠️
+                </div>
+            </div>
+            <div class="card">
+                <h2>Deterrent Status</h2>
+                <div class="metrics-grid">
+                    <div class="metric-box">
+                        <div class="metric-title">Activations</div>
+                        <div class="metric-value" id="activations-val">0</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-title">Last Deterrent</div>
+                        <div class="metric-value" id="last-det-val" style="font-size: 1.1rem; line-height: 1.3;">--</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-title">Last Source</div>
+                        <div class="metric-value" id="det-source-val" style="font-size: 1.2rem;">--</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-title">Cooldown</div>
+                        <div class="metric-value" id="cooldown-val">0 s</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="card" style="flex: 1;">
+                <h2>System Logs</h2>
+                <table class="log-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Event</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logs-body">
+                        <!-- Logs populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="card" style="flex: 1; margin-top: 1.5rem;">
+                <h2>Recent Playback History</h2>
+                <table class="log-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Audio Played</th>
+                            <th>Source</th>
+                        </tr>
+                    </thead>
+                    <tbody id="playback-body">
+                        <!-- Playback history populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function updateStatus() {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('sys-status-badge');
+                    if(data.engine_running) {
+                        badge.className = 'status-badge running';
+                        badge.innerText = 'SYSTEM RUNNING';
+                    } else {
+                        badge.className = 'status-badge stopped';
+                        badge.innerText = 'SYSTEM STOPPED';
+                    }
+
+                    document.getElementById('vision-bird').innerText = data.vision_bird;
+                    document.getElementById('vision-conf').innerText = data.vision_conf + '%';
+                    
+                    document.getElementById('audio-bird').innerText = data.audio_bird;
+                    document.getElementById('audio-conf').innerText = data.audio_conf + '%';
+                    
+                    document.getElementById('dist-val').innerText = parseFloat(data.distance_m).toFixed(2) + ' m';
+                    document.getElementById('batt-val').innerText = data.battery_level;
+
+                    const scareAlert = document.getElementById('scare-alert');
+                    if(data.scare_active) {
+                        scareAlert.style.display = 'block';
+                    } else {
+                        scareAlert.style.display = 'none';
+                    }
+
+                    document.getElementById('activations-val').innerText = data.activations || 0;
+                    document.getElementById('last-det-val').innerText = data.last_deterrent || '--';
+                    document.getElementById('det-source-val').innerText = data.detection_source || '--';
+                    document.getElementById('cooldown-val').innerText = (data.cooldown_remaining || 0) + ' s';
+                })
+                .catch(err => console.error(err));
+        }
+
+        function updateLogs() {
+            fetch('/api/logs')
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.getElementById('logs-body');
+                    const pbody = document.getElementById('playback-body');
+                    tbody.innerHTML = '';
+                    pbody.innerHTML = '';
+
+                    data.forEach(log => {
+                        const tr = document.createElement('tr');
+                        
+                        // Parse timestamp to readable time
+                        const timeStr = log.timestamp.split(' ')[1];
+                        
+                        let eventClass = 'log-type-info';
+                        if(log.event_type === 'SCARE_ACTIVATED') eventClass = 'log-type-scare';
+                        
+                        let details = '';
+                        if(log.species) details += `Species: ${log.species} `;
+                        if(log.alarm_played) details += `| Alarm: ${log.alarm_played} `;
+                        if(log.detection_source && log.detection_source !== "UNKNOWN") details += `| Source: ${log.detection_source} `;
+
+                        tr.innerHTML = `
+                            <td style="color: #888;">${timeStr}</td>
+                            <td class="${eventClass}">${log.event_type}</td>
+                            <td style="color: #ccc;">${details || log.system_status || '-'}</td>
+                        `;
+                        tbody.appendChild(tr);
+
+                        // Populate Playback History if it's a SCARE_ACTIVATED event
+                        if (log.event_type === 'SCARE_ACTIVATED') {
+                            const ptr = document.createElement('tr');
+                            ptr.innerHTML = `
+                                <td style="color: #888;">${timeStr}</td>
+                                <td style="color: var(--warning-color); font-weight: bold;">${log.alarm_played || '-'}</td>
+                                <td style="color: #ccc;">${log.detection_source || '-'}</td>
+                            `;
+                            pbody.appendChild(ptr);
+                        }
+                    });
+                })
+                .catch(err => console.error(err));
+        }
+
+        setInterval(updateStatus, 1000);
+        setInterval(updateLogs, 2000);
+        
+        // Initial fetch
+        updateStatus();
+        updateLogs();
+    </script>
+</body>
+</html>

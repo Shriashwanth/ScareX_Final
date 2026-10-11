@@ -1,0 +1,17 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+nc: 12
+names:
+- Crow
+- Common_Myna
+- Rose_Ringed_Parakeet
+- Peacock
+- Pigeon
+- Hen
+- Sparrow
+- Dove
+- Koel
+- Duck
+- Goose
+- Turkey
